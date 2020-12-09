@@ -1,4 +1,4 @@
-import { NativeModules, Dimensions } from 'react-native';
+import { NativeModules, NativeEventEmitter, Dimensions } from 'react-native';
 
 export type RecordingStartResponse = 'started';
 
@@ -38,6 +38,7 @@ const RS = RecordScreen as RecordScreenType;
 class ReactNativeRecordScreenClass {
   private _screenWidth = Dimensions.get('window').width;
   private _screenHeight = Dimensions.get('window').height;
+  private _eventEmitter = new NativeEventEmitter(RS);
 
   setup(config: RecordScreenConfigType = {}): void {
     const conf = Object.assign(
@@ -62,6 +63,7 @@ class ReactNativeRecordScreenClass {
 
   stopRecording(): Promise<RecordingResponse> {
     return new Promise((resolve, reject) => {
+      this._eventEmitter.removeAllListeners('recordingError');
       RS.stopRecording().then(resolve).catch(reject);
     });
   }
@@ -70,6 +72,11 @@ class ReactNativeRecordScreenClass {
     return new Promise((resolve, reject) => {
       RS.clean().then(resolve).catch(reject);
     });
+  }
+
+  addEventListener(callback: Function) {
+    this._eventEmitter.removeAllListeners('recordingError');
+    this._eventEmitter.addListener('recordingError', callback);
   }
 }
 
