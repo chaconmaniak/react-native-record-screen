@@ -165,13 +165,19 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
                             }
                         }
                     } completionHandler:^(NSError* error) {
-                        NSLog(@"startCapture: %@", error);
-                        resolve(@"started");
+                        if (error) {
+                            NSLog(@"Error recording %@", error);
+                            reject(0, @"Permission denied", error);
+                        } else {
+                            NSLog(@"startCapture: %@", error);
+                            resolve(@"started");
+                        }
                     }];
                 } else {
                     // Fallback on earlier versions
                 }
             } else {
+                // This never runs (tested on iOS14.1)
                 NSError* err = nil;
                 reject(0, @"Permission denied", err);
             }
