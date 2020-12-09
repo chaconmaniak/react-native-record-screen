@@ -1,9 +1,18 @@
 #import "RecordScreen.h"
 #import <React/RCTConvert.h>
 
+
+static NSString* recordingError = @"recordingError";
+
 @implementation RecordScreen
 
 const int DEFAULT_FPS = 30;
+
+- (NSArray<NSString *> *)supportedEvents {
+  return @[
+      recordingError,
+  ];
+}
 
 - (NSDictionary *)errorResponse:(NSDictionary *)result;
 {
@@ -120,6 +129,7 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
     }
     
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+        dispatch_once_t onceToken = 0;
         dispatch_async(dispatch_get_main_queue(), ^{
             if (granted) {
                 if (@available(iOS 11.0, *)) {
@@ -131,7 +141,16 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
                                 [self.writer startWriting];
                                 [self.writer startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
                             } else if (self.writer.status == AVAssetWriterStatusFailed) {
-                                
+                                // This error can happen sometimes after changing audio sessions
+                                // I haven't been able to find the actual cause or a fix
+                                // The actual buffer appears to be OK, but the writer will fail whenever we wish to write anything
+                                // Make sure we only call this handler once, stopRecording should still be invoked after getting this error
+                                dispatch_once(&onceToken, ^{
+                                    NSLog(@"write fail: %@", self.writer.error);
+                                    [self sendEventWithName:recordingError body:@{ @"error": self.writer.error.localizedDescription }];
+                                });
+
+                                return;
                             }
                             
                             if (self.writer.status == AVAssetWriterStatusWriting) {
@@ -223,7 +242,6 @@ RCT_REMAP_METHOD(clean,
                  cleanResolve:(RCTPromiseResolveBlock)resolve
                  cleanRejecte:(RCTPromiseRejectBlock)reject)
 {
-
     NSArray *pathDocuments = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *path = pathDocuments[0];
     [[NSFileManager defaultManager] removeItemAtPath:path error:nil];

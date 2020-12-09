@@ -1,8 +1,9 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 #import <ReplayKit/ReplayKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface RecordScreen : NSObject <RCTBridgeModule>
+@interface RecordScreen : RCTEventEmitter <RCTBridgeModule>
 
     @property (strong, nonatomic) RPScreenRecorder *screenRecorder;
     @property (strong, nonatomic) AVAssetWriterInput *videoInput;
