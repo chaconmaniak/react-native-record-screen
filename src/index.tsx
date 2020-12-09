@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NativeModules, NativeEventEmitter, Dimensions } from 'react-native';
 
 export type RecordingStartResponse = 'started';
