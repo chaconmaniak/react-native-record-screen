@@ -63,7 +63,7 @@ class ReactNativeRecordScreenClass {
 
   stopRecording(): Promise<RecordingResponse> {
     return new Promise((resolve, reject) => {
-      this._eventEmitter.removeAllListeners('recordingError');
+      this.clearListener();
       RS.stopRecording().then(resolve).catch(reject);
     });
   }
@@ -75,8 +75,12 @@ class ReactNativeRecordScreenClass {
   }
 
   addEventListener(callback: Function) {
-    this._eventEmitter.removeAllListeners('recordingError');
+    this.clearListener();
     this._eventEmitter.addListener('recordingError', callback);
+  }
+
+  clearListener() {
+    this._eventEmitter.removeAllListeners('recordingError');
   }
 }
 
