@@ -128,8 +128,8 @@ RCT_REMAP_METHOD(startRecording, resolve:(RCTPromiseResolveBlock)resolve rejecte
         self.screenRecorder.microphoneEnabled = YES;
     }
     
+    dispatch_once_t onceToken = 0;
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-        dispatch_once_t onceToken = 0;
         dispatch_async(dispatch_get_main_queue(), ^{
             if (granted) {
                 if (@available(iOS 11.0, *)) {

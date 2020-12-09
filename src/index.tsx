@@ -63,7 +63,6 @@ class ReactNativeRecordScreenClass {
 
   stopRecording(): Promise<RecordingResponse> {
     return new Promise((resolve, reject) => {
-      this.clearListener();
       RS.stopRecording().then(resolve).catch(reject);
     });
   }
